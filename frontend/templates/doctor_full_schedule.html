@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container" style="margin-top: 3rem;">
+    <h2>Full Schedule</h2>
+    <div style="margin-top: 1rem;">
+        <table style="width:100%; border-collapse: collapse;">
+            <thead>
+                <tr style="text-align:left; color: var(--text-dim);">
+                    <th style="padding:0.75rem;">Date</th>
+                    <th style="padding:0.75rem;">Time</th>
+                    <th style="padding:0.75rem;">Patient</th>
+                    <th style="padding:0.75rem;">Status</th>
+                    <th style="padding:0.75rem;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appt, patient in appointments %}
+                <tr>
+                    <td style="padding:0.75rem;">{{ appt.date }}</td>
+                    <td style="padding:0.75rem;">{{ appt.time }}</td>
+                    <td style="padding:0.75rem;">{{ patient.name }}</td>
+                    <td style="padding:0.75rem;">{{ appt.status }}</td>
+                    <td style="padding:0.75rem;"><a href="{{ url_for('consultation', appointment_id=appt.id) }}" class="btn btn-primary">Open</a></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" style="padding:2rem; text-align:center; color:var(--text-dim);">No appointments.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin-top: 4rem;">
+    <div class="card">
+        <h2 style="margin-bottom: 0.5rem;">Consultation Saved</h2>
+        <p style="color: var(--text-dim);">Patient: <strong>{{ patient.name }}</strong> | Booking ID: <span style="font-family: monospace;">{{ appt.booking_id }}</span></p>
+
+        <div style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div style="padding: 1rem; background: var(--bg-deep); border-radius: 8px;">
+                <h4 style="margin-bottom: 0.5rem;">Diagnosis</h4>
+                <p style="white-space: pre-wrap;">{{ cons.diagnosis }}</p>
+            </div>
+            <div style="padding: 1rem; background: var(--bg-deep); border-radius: 8px;">
+                <h4 style="margin-bottom: 0.5rem;">Prescription</h4>
+                <p style="white-space: pre-wrap;">{{ cons.prescription }}</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; display:flex; gap:1rem;">
+            <a href="{{ url_for('doctor_dashboard') }}" class="btn btn-outline">Back to Dashboard</a>
+            <a href="{{ url_for('patient_dashboard') }}" class="btn btn-primary">View Patient Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
