@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 900px; margin-top: 4rem;">
+    <div class="card" style="position: relative;">
+        <div style="position: absolute; top: 0; right: 2rem; transform: translateY(-50%); background: var(--primary); padding: 0.5rem 1.5rem; border-radius: 50px; font-weight: 700; font-size: 0.8rem; box-shadow: 0 0 20px var(--primary);">ACTIVE REGISTRY</div>
+        
+        <div style="margin-bottom: 3rem;">
+            <h2 style="font-size: 2rem; margin-bottom: 0.5rem;">Consultation & Prescription</h2>
+            <p style="color: var(--text-dim);">Patient ID: {{ appt.patient_id }} | Booking ID: <span style="font-family: monospace; color: var(--primary);">{{ appt.booking_id }}</span></p>
+        </div>
+
+        <form method="POST" action="{{ url_for('save_consultation') }}">
+            <input type="hidden" name="appointment_id" value="{{ appt.id }}">
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="form-group">
+                    <label style="color: var(--text-dim); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 10px; display: block;">Diagnosis</label>
+                    <textarea name="diagnosis" class="form-control" rows="8" placeholder="Enter patient diagnosis..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label style="color: var(--text-dim); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 10px; display: block;">Prescription</label>
+                    <textarea name="prescription" class="form-control" rows="8" placeholder="Enter medicines and dosage..." required></textarea>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-top: 2rem; align-items: flex-end;">
+                <div class="form-group" style="margin: 0;">
+                    <label style="color: var(--text-dim); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 10px; display: block;">Follow-up Date</label>
+                    <input type="date" name="follow_up" class="form-control">
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 2; padding: 1rem; font-size: 1rem;">Save Consultation</button>
+                    <a href="{{ url_for('doctor_dashboard') }}" class="btn btn-outline" style="flex: 1; text-align: center; display: flex; align-items: center; justify-content: center;">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

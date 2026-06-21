@@ -1,0 +1,187 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container" style="margin-top: 4rem;">
+    <!-- Wizard Progress -->
+    <div style="max-width: 800px; margin: 0 auto 4rem; display: flex; justify-content: space-between; position: relative;">
+        <div style="position: absolute; top: 15px; left: 0; width: 100%; height: 2px; background: rgba(255,255,255,0.1); z-index: 1;"></div>
+        <div id="progress-bar" style="position: absolute; top: 15px; left: 0; width: 25%; height: 2px; background: var(--primary); z-index: 2; transition: width 0.5s ease; box-shadow: 0 0 10px var(--primary);"></div>
+        
+        <div class="step-indicator active" data-step="1" style="position: relative; z-index: 3; background: var(--bg-deep); width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700;">1</div>
+        <div class="step-indicator" data-step="2" style="position: relative; z-index: 3; background: var(--bg-deep); width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-weight: 700;">2</div>
+        <div class="step-indicator" data-step="3" style="position: relative; z-index: 3; background: var(--bg-deep); width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-weight: 700;">3</div>
+        <div class="step-indicator" data-step="4" style="position: relative; z-index: 3; background: var(--bg-deep); width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-weight: 700;">4</div>
+    </div>
+
+    <div class="grid" style="grid-template-columns: 1fr 2fr; gap: 3rem; align-items: start;">
+        <!-- Doctor Info Sidebar -->
+        <div class="card" style="position: sticky; top: 120px;">
+            <div style="text-align: center;">
+                <div style="width: 140px; height: 140px; background: var(--bg-deep); border-radius: 30px; display: flex; align-items: center; justify-content: center; font-size: 4rem; color: var(--primary); border: 2px solid var(--border-glow); margin: 0 auto 1.5rem; box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <h2 style="font-size: 1.8rem;">{{ doctor.name }}</h2>
+                <p class="tag" style="margin: 1rem 0;">{{ doctor.specialization }}</p>
+                
+                <div style="text-align: left; margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem; color: var(--text-dim); font-size: 0.95rem;">
+                    <div style="display: flex; justify-content: space-between;"><span>Experience</span><span style="color: #fff;">{{ doctor.experience }} Years</span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Location</span><span style="color: #fff;">{{ doctor.location }}</span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Consultation Fee</span><span style="color: var(--primary); font-weight: 700; font-size: 1.2rem;">₹{{ doctor.fee }}</span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Patient Score</span><span style="color: #FFD700;"><i class="fas fa-star"></i> {{ doctor.rating }}</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Wizard Sections -->
+        <div class="card booking-card" style="padding: 3rem;">
+            <form action="{{ url_for('book_appointment') }}" method="POST" id="booking-form">
+                <input type="hidden" name="doctor_id" value="{{ doctor.id }}">
+
+                <!-- Step 1: Date & Time -->
+                <div class="wizard-step" id="step-1">
+                    <h3 style="margin-bottom: 2rem;"><i class="fas fa-calendar-alt" style="color: var(--primary); margin-right: 15px;"></i> Step 1: Select Date & Time</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 3rem;">
+                        <div class="form-group">
+                            <label style="color: var(--text-dim); margin-bottom: 0.8rem;">Select Date</label>
+                            <select name="date" class="form-control" id="date-select" required onchange="updateSlots()">
+                                {% for day in slots %}
+                                <option value="{{ day.date }}">{{ day.date }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label style="color: var(--text-dim); margin-bottom: 0.8rem;">Available Slots</label>
+                            <select name="time" class="form-control" id="time-select" required>
+                                <!-- JS Populated -->
+                            </select>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <button type="button" class="btn btn-primary" onclick="nextStep(2)">Patient Details <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Patient Details -->
+                <div class="wizard-step" id="step-2" style="display: none;">
+                    <h3 style="margin-bottom: 2rem;"><i class="fas fa-id-card" style="color: var(--primary); margin-right: 15px;"></i> Step 2: Patient Details</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label>Age</label>
+                            <input type="number" name="age" class="form-control" placeholder="Enter age">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" name="phone" class="form-control" placeholder="+91 ...">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Blood Group</label>
+                        <select name="blood_group" class="form-control">
+                            <option>A (Rh+)</option><option>A (Rh-)</option><option>B (Rh+)</option><option>B (Rh-)</option>
+                            <option>O (Rh+)</option><option>O (Rh-)</option><option>AB (Rh+)</option><option>AB (Rh-)</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 3rem;">
+                        <button type="button" class="btn btn-outline" onclick="nextStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep(3)">Medical History <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Medical History -->
+                <div class="wizard-step" id="step-3" style="display: none;">
+                    <h3 style="margin-bottom: 2rem;"><i class="fas fa-file-medical-alt" style="color: var(--primary); margin-right: 15px;"></i> Step 3: Medical History</h3>
+                    <div class="form-group">
+                        <label>Pre-existing Conditions</label>
+                        <textarea name="conditions" class="form-control" rows="3" placeholder="List any chronic conditions..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Current Medications</label>
+                        <textarea name="medications" class="form-control" rows="3" placeholder="List your current meds..."></textarea>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 3rem;">
+                        <button type="button" class="btn btn-outline" onclick="nextStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep(4)">Review Summary <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Final Confirmation -->
+                <div class="wizard-step" id="step-4" style="display: none;">
+                    <div style="text-align: center; margin-bottom: 3rem;">
+                        <div style="width: 80px; height: 80px; background: rgba(34, 197, 94, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #22c55e; margin: 0 auto 1.5rem; border: 1px solid rgba(34, 197, 94, 0.3);">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <h3>Confirm Booking</h3>
+                        <p style="color: var(--text-dim); margin-top: 0.5rem;">Review your appointment details before finishing.</p>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--border-glow); margin-bottom: 2rem;">
+                        <p style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;"><span>Appointment Date:</span> <strong id="sum-date">2024-06-22</strong></p>
+                        <p style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;"><span>Preferred Time:</span> <strong id="sum-time">09:00</strong></p>
+                        <p style="display: flex; justify-content: space-between;"><span>Doctor:</span> <strong>{{ doctor.name }}</strong></p>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between;">
+                        <button type="button" class="btn btn-outline" onclick="nextStep(3)"><i class="fas fa-arrow-left"></i> Change</button>
+                        <button type="submit" class="btn btn-primary" style="padding: 0.8rem 3rem;">Book Now</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .step-indicator.active {
+        color: var(--primary);
+        border-color: var(--primary);
+        box-shadow: 0 0 15px var(--primary);
+        text-shadow: 0 0 5px var(--primary);
+    }
+</style>
+
+<script>
+    const slotsData = {{ slots|tojson }};
+    const dateSelect = document.getElementById('date-select');
+    const timeSelect = document.getElementById('time-select');
+    const progressBar = document.getElementById('progress-bar');
+    const indicators = document.querySelectorAll('.step-indicator');
+
+    function updateSlots() {
+        const selectedDate = dateSelect.value;
+        const day = slotsData.find(d => d.date === selectedDate);
+        timeSelect.innerHTML = '';
+        if (day) {
+            day.times.forEach(time => {
+                const opt = document.createElement('option');
+                opt.value = time;
+                opt.textContent = time;
+                timeSelect.appendChild(opt);
+            });
+        }
+    }
+
+    function nextStep(step) {
+        document.querySelectorAll('.wizard-step').forEach(el => el.style.display = 'none');
+        document.getElementById(`step-${step}`).style.display = 'block';
+        
+        // Progress UI
+        progressBar.style.width = ((step / 4) * 100) + '%';
+        indicators.forEach(ind => {
+            if (ind.dataset.step <= step) {
+                ind.classList.add('active');
+            } else {
+                ind.classList.remove('active');
+            }
+        });
+
+        // Summary populate
+        if(step === 4) {
+            document.getElementById('sum-date').textContent = dateHidden.value;
+            document.getElementById('sum-time').textContent = timeHidden.value;
+        }
+    }
+
+    updateSlots();
+</script>
+{% endblock %}
