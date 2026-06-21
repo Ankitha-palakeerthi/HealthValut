@@ -4,13 +4,13 @@ import string
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, Doctor, Patient, Appointment, Consultation, BlockedSlot
+from werkzeug.security import generate_password_hash, check_password_hash
+ 
 from sqlalchemy import inspect, text
 from datetime import datetime, timedelta
 
 app = Flask(__name__, 
-            template_folder='../frontend/templates',
             static_folder='../frontend/static')
 app.config['SECRET_KEY'] = 'healthvault-secret-key-123'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
