@@ -156,6 +156,7 @@ def book_appointment():
     except Exception as e:
         db.session.rollback()
         return "Selected slot unavailable. Please choose another available slot.", 400
+
 @app.route('/patient/dashboard')
 @login_required
 def patient_dashboard():
@@ -165,20 +166,31 @@ def patient_dashboard():
     patient = Patient.query.filter_by(user_id=current_user.id).first()
 
     if not patient:
-        return render_template("patient_dashboard.html", patient=None)
+        return render_template("patient_dashboard.html", patient=None, appointments=[], history=[], last_consultation=None)
 
-    return render_template("patient_dashboard.html", patient=patient)
-    
-    # Get appointments with doctor info
-    appointments = db.session.query(Appointment, Doctor).join(Doctor, Appointment.doctor_id == Doctor.id).filter(Appointment.patient_id == patient.id).all()
-    
-    # History includes consultations joins
-    history = db.session.query(Appointment, Consultation, Doctor).join(Consultation, Appointment.id == Consultation.appointment_id).join(Doctor, Appointment.doctor_id == Doctor.id).filter(Appointment.patient_id == patient.id).all()
+    appointments = db.session.query(Appointment, Doctor)\
+        .join(Doctor, Appointment.doctor_id == Doctor.id)\
+        .filter(Appointment.patient_id == patient.id).all()
 
-    # Last consultation (most recent)
-    last_consultation = db.session.query(Consultation, Appointment, Doctor).join(Appointment, Consultation.appointment_id == Appointment.id).join(Doctor, Appointment.doctor_id == Doctor.id).filter(Appointment.patient_id == patient.id).order_by(Consultation.created_at.desc()).first()
-    
-    return render_template('patient_dashboard.html', appointments=appointments, history=history, last_consultation=last_consultation)
+    history = db.session.query(Appointment, Consultation, Doctor)\
+        .join(Consultation, Appointment.id == Consultation.appointment_id)\
+        .join(Doctor, Appointment.doctor_id == Doctor.id)\
+        .filter(Appointment.patient_id == patient.id).all()
+
+    last_consultation = db.session.query(Consultation, Appointment, Doctor)\
+        .join(Appointment, Consultation.appointment_id == Appointment.id)\
+        .join(Doctor, Appointment.doctor_id == Doctor.id)\
+        .filter(Appointment.patient_id == patient.id)\
+        .order_by(Consultation.created_at.desc()).first()
+
+    return render_template(
+        'patient_dashboard.html',
+        patient=patient,
+        appointments=appointments,
+        history=history,
+        last_consultation=last_consultation
+    )
+
 
 @app.route('/patient/billing')
 @login_required
