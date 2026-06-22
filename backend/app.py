@@ -10,8 +10,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import inspect, text
 from datetime import datetime, timedelta
 
-app = Flask(__name__, 
-            static_folder='../frontend/static')
+app = Flask(__name__,
+            static_folder='../frontend/static',
+            template_folder='templates')
 app.config['SECRET_KEY'] = 'healthvault-secret-key-123'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
