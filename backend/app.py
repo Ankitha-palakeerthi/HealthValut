@@ -155,13 +155,18 @@ def book_appointment():
     except Exception as e:
         db.session.rollback()
         return "Selected slot unavailable. Please choose another available slot.", 400
-
 @app.route('/patient/dashboard')
 @login_required
 def patient_dashboard():
     if current_user.role != 'patient':
         return redirect(url_for('index'))
+
     patient = Patient.query.filter_by(user_id=current_user.id).first()
+
+    if not patient:
+        return render_template("patient_dashboard.html", patient=None)
+
+    return render_template("patient_dashboard.html", patient=patient)
     
     # Get appointments with doctor info
     appointments = db.session.query(Appointment, Doctor).join(Doctor, Appointment.doctor_id == Doctor.id).filter(Appointment.patient_id == patient.id).all()
