@@ -170,15 +170,15 @@ def patient_dashboard():
         .filter(Appointment.patient_id == patient.id).all()
 
     history = db.session.query(Appointment, Consultation, Doctor)\
-        .join(Consultation, Appointment.id == Consultation.appointment_id)\
-        .join(Doctor, Appointment.doctor_id == Doctor.id)\
-        .filter(Appointment.patient_id == patient.id).all()
+    .outerjoin(Consultation, Appointment.id == Consultation.appointment_id)\
+    .join(Doctor, Appointment.doctor_id == Doctor.id)\
+    .filter(Appointment.patient_id == patient.id).all()
 
     last_consultation = db.session.query(Consultation, Appointment, Doctor)\
-        .join(Appointment, Consultation.appointment_id == Appointment.id)\
-        .join(Doctor, Appointment.doctor_id == Doctor.id)\
-        .filter(Appointment.patient_id == patient.id)\
-        .order_by(Consultation.created_at.desc()).first()
+    .outerjoin(Appointment, Consultation.appointment_id == Appointment.id)\
+    .join(Doctor, Appointment.doctor_id == Doctor.id)\
+    .filter(Appointment.patient_id == patient.id)\
+    .order_by(Consultation.created_at.desc()).first()
 
     return render_template(
         'patient_dashboard.html',
