@@ -161,24 +161,24 @@ def patient_dashboard():
         return redirect(url_for('index'))
 
     patient = Patient.query.filter_by(user_id=current_user.id).first()
-
     if not patient:
-        return render_template("patient_dashboard.html", patient=None, appointments=[], history=[], last_consultation=None)
+        flash("Patient profile missing", "error")
+        return redirect(url_for('patient_settings'))
 
     appointments = db.session.query(Appointment, Doctor)\
         .join(Doctor, Appointment.doctor_id == Doctor.id)\
         .filter(Appointment.patient_id == patient.id).all()
 
     history = db.session.query(Appointment, Consultation, Doctor)\
-    .outerjoin(Consultation, Appointment.id == Consultation.appointment_id)\
-    .join(Doctor, Appointment.doctor_id == Doctor.id)\
-    .filter(Appointment.patient_id == patient.id).all()
+        .outerjoin(Consultation, Appointment.id == Consultation.appointment_id)\
+        .join(Doctor, Appointment.doctor_id == Doctor.id)\
+        .filter(Appointment.patient_id == patient.id).all()
 
     last_consultation = db.session.query(Consultation, Appointment, Doctor)\
-    .outerjoin(Appointment, Consultation.appointment_id == Appointment.id)\
-    .join(Doctor, Appointment.doctor_id == Doctor.id)\
-    .filter(Appointment.patient_id == patient.id)\
-    .order_by(Consultation.created_at.desc()).first()
+        .outerjoin(Appointment, Consultation.appointment_id == Appointment.id)\
+        .join(Doctor, Appointment.doctor_id == Doctor.id)\
+        .filter(Appointment.patient_id == patient.id)\
+        .order_by(Consultation.created_at.desc()).first()
 
     return render_template(
         'patient_dashboard.html',
