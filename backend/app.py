@@ -121,26 +121,20 @@ def doctor_profile(doctor_id):
         
     return render_template('doctor_profile.html', doctor=doctor, slots=slots)
 
-# Booking
 @app.route('/book', methods=['POST'])
 @login_required
 def book_appointment():
     if current_user.role != 'patient':
         return jsonify({'error': 'Only patients can book appointments'}), 403
-        
+
     doctor_id = request.form.get('doctor_id')
     date = request.form.get('date')
     time = request.form.get('time')
-    
+
     patient = Patient.query.filter_by(user_id=current_user.id).first()
-    
-    # Fill additional info
-    patient.age = request.form.get('age')
-    patient.phone = request.form.get('phone')
-    patient.blood_group = request.form.get('blood_group')
-    patient.medical_conditions = request.form.get('conditions')
-    patient.medications = request.form.get('medications')
-    
+    if not patient:
+        return "Patient profile missing", 400
+
     try:
         new_appointment = Appointment(
             booking_id=generate_booking_id(),
@@ -150,12 +144,15 @@ def book_appointment():
             time=time,
             status='Scheduled'
         )
+
         db.session.add(new_appointment)
         db.session.commit()
-        return render_template('booking_confirmation.html', appt=new_appointment)
+
+        return redirect(url_for('patient_dashboard'))  # 🔥 IMPORTANT CHANGE
+
     except Exception as e:
         db.session.rollback()
-        return "Selected slot unavailable. Please choose another available slot.", 400
+        return f"Error: {str(e)}", 400
 
 @app.route('/patient/dashboard')
 @login_required
